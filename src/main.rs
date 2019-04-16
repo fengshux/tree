@@ -4,13 +4,20 @@ use std::fs;
 
 fn read_dir<P: AsRef<Path>>(p: P , prefix: &str) {
     if let Ok(entries) = fs::read_dir(p) {
-        for entry in entries {
+        let hidden = entries.filter(| x | {
+            if let Ok(y) = x {
+                return !y.file_name().into_string().unwrap().starts_with(".");
+            }
+            return true;
+        });
+        
+        for entry in hidden {
             if let Ok(entry) = entry {
                 print!("{}", prefix);
                 if let Ok(name) = entry.file_name().into_string() {
                     println!("|____{}", name);
                 }
-
+                
                 let path = entry.path();
                 if path.is_dir() {
                     let next_prefix = "| ".to_string() + prefix;
@@ -20,8 +27,6 @@ fn read_dir<P: AsRef<Path>>(p: P , prefix: &str) {
         }
     }
 }
-
-
 
 fn main() {
     
